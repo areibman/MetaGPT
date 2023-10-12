@@ -1,0 +1,47 @@
+{
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.11.3",
+    "heartbeatAt": "2023-10-05T22:14:33.103286",
+    "startedAt": "2023-10-05T22:14:32.528950",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "create a 2048 game for the web."
+    ],
+    "state": "running",
+    "program": "/Users/reibs/Projects/MetaGPT/startup.py",
+    "codePathLocal": "startup.py",
+    "codePath": "startup.py",
+    "git": {
+        "remote": "https://github.com/geekan/MetaGPT.git",
+        "commit": "213b459d9599f90f715af9be7f051ba197f6e290"
+    },
+    "email": "areibman@gmail.com",
+    "root": "/Users/reibs/Projects/MetaGPT",
+    "host": "Reibmac.local",
+    "username": "reibs",
+    "executable": "/Users/reibs/Projects/MetaGPT/env/bin/python",
+    "cpu_count": 10,
+    "cpu_count_logical": 10,
+    "cpu_freq": {
+        "current": 2400,
+        "min": 2400,
+        "max": 2400
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2400,
+            "min": 2400,
+            "max": 2400
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 926.3517189025879,
+            "used": 11.26348876953125
+        }
+    },
+    "memory": {
+        "total": 16.0
+    }
+}
