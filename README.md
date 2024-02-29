@@ -1,29 +1,49 @@
+
 # MetaGPT: The Multi-Agent Framework
 
 <p align="center">
-<a href=""><img src="docs/resources/MetaGPT-logo.jpeg" alt="MetaGPT logo: Enable GPT to work in software company, collaborating to tackle more complex tasks." width="150px"></a>
+<a href=""><img src="docs/resources/MetaGPT-new-log.png" alt="MetaGPT logo: Enable GPT to work in software company, collaborating to tackle more complex tasks." width="150px"></a>
 </p>
 
 <p align="center">
-<b>Assign different roles to GPTs to form a collaborative software entity for complex tasks.</b>
+<b>Assign different roles to GPTs to form a collaborative entity for complex tasks.</b>
 </p>
 
 <p align="center">
 <a href="docs/README_CN.md"><img src="https://img.shields.io/badge/文档-中文版-blue.svg" alt="CN doc"></a>
 <a href="README.md"><img src="https://img.shields.io/badge/document-English-blue.svg" alt="EN doc"></a>
 <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-blue.svg" alt="JA doc"></a>
-<a href="https://discord.gg/wCp6Q3fsAk"><img src="https://img.shields.io/badge/Discord-Join-blue?logo=discord&logoColor=white&color=blue" alt="Discord Follow"></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
 <a href="docs/ROADMAP.md"><img src="https://img.shields.io/badge/ROADMAP-路线图-blue" alt="roadmap"></a>
-<a href="https://twitter.com/DeepWisdom2019"><img src="https://img.shields.io/twitter/follow/MetaGPT?style=social" alt="Twitter Follow"></a>
+<a href="https://discord.gg/DYn29wFk9z"><img src="https://dcbadge.vercel.app/api/server/DYn29wFk9z?style=flat" alt="Discord Follow"></a>
+<a href="https://twitter.com/MetaGPT_"><img src="https://img.shields.io/twitter/follow/MetaGPT?style=social" alt="Twitter Follow"></a>
 </p>
 
 <p align="center">
-   <a href="https://airtable.com/appInfdG0eJ9J4NNL/shrEd9DrwVE3jX6oz"><img src="https://img.shields.io/badge/AgentStore-Waitlist-ffc107?logoColor=white" alt="AgentStore Waitlist"></a>
    <a href="https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/geekan/MetaGPT"><img src="https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode" alt="Open in Dev Containers"></a>
    <a href="https://codespaces.new/geekan/MetaGPT"><img src="https://img.shields.io/badge/Github_Codespace-Open-blue?logo=github" alt="Open in GitHub Codespaces"></a>
    <a href="https://huggingface.co/spaces/deepwisdom/MetaGPT" target="_blank"><img alt="Hugging Face" src="https://img.shields.io/badge/%F0%9F%A4%97%20-Hugging%20Face-blue?color=blue&logoColor=white" /></a>
 </p>
+
+## News
+🚀 Feb. 08, 2024: [v0.7.0](https://github.com/geekan/MetaGPT/releases/tag/v0.7.0) released, supporting assigning different LLMs to different Roles. We also introduced [Interpreter](https://github.com/geekan/MetaGPT/blob/main/examples/mi/README.md), a powerful agent capable of solving a wide range of real-world problems.
+
+🚀 Jan. 16, 2024: Our paper [MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework
+](https://arxiv.org/abs/2308.00352) accepted for oral presentation **(top 1.2%)** at ICLR 2024, **ranking #1** in the LLM-based Agent category.
+
+🚀 Jan. 03, 2024: [v0.6.0](https://github.com/geekan/MetaGPT/releases/tag/v0.6.0) released, new features include serialization, upgraded OpenAI package and supported multiple LLM, provided [minimal example for debate](https://github.com/geekan/MetaGPT/blob/main/examples/debate_simple.py) etc.
+
+🚀 Dec. 15, 2023: [v0.5.0](https://github.com/geekan/MetaGPT/releases/tag/v0.5.0) released, introducing some experimental features such as **incremental development**, **multilingual**, **multiple programming languages**, etc.
+
+🔥 Nov. 08, 2023: MetaGPT is selected into [Open100: Top 100 Open Source achievements](https://www.benchcouncil.org/evaluation/opencs/annual.html).
+
+🔥 Sep. 01, 2023: MetaGPT tops GitHub Trending Monthly for the **17th time** in August 2023.
+
+🌟 Jun. 30, 2023: MetaGPT is now open source.
+
+🌟 Apr. 24, 2023: First line of MetaGPT code committed.
+
+## Software Company as Multi-Agent System
 
 1. MetaGPT takes a **one line requirement** as input and outputs **user stories / competitive analysis / requirements / data structures / APIs / documents, etc.**
 2. Internally, MetaGPT includes **product managers / architects / project managers / engineers.** It provides the entire process of a **software company along with carefully orchestrated SOPs.**
@@ -31,299 +51,102 @@
 
 ![A software company consists of LLM-based roles](docs/resources/software_company_cd.jpeg)
 
-<p align="center">Software Company Multi-Role Schematic (Gradually Implementing)</p>
+<p align="center">Software Company Multi-Agent Schematic (Gradually Implementing)</p>
 
-## MetaGPT's Abilities
+## Install
 
+### Pip installation
 
-https://github.com/geekan/MetaGPT/assets/34952977/34345016-5d13-489d-b9f9-b82ace413419
-
-
-
-## Examples (fully generated by GPT-4)
-
-For example, if you type `python startup.py "Design a RecSys like Toutiao"`, you would get many outputs, one of them is data & api design
-
-![Jinri Toutiao Recsys Data & API Design](docs/resources/workspace/content_rec_sys/resources/data_api_design.png)
-
-It costs approximately **$0.2** (in GPT-4 API fees) to generate one example with analysis and design, and around **$2.0** for a full project.
-
-
-
-
-## Installation
-
-### Installation Video Guide
-
-- [Matthew Berman: How To Install MetaGPT - Build A Startup With One Prompt!!](https://youtu.be/uT75J_KG_aY)
-
-### Traditional Installation
+> Ensure that Python 3.9+ is installed on your system. You can check this by using: `python --version`.  
+> You can use conda like this: `conda create -n metagpt python=3.9 && conda activate metagpt`
 
 ```bash
-# Step 1: Ensure that NPM is installed on your system. Then install mermaid-js. (If you don't have npm in your computer, please go to the Node.js offical website to install Node.js https://nodejs.org/ and then you will have npm tool in your computer.)
-npm --version
-sudo npm install -g @mermaid-js/mermaid-cli
-
-# Step 2: Ensure that Python 3.9+ is installed on your system. You can check this by using:
-python --version
-
-# Step 3: Clone the repository to your local machine, and install it.
-git clone https://github.com/geekan/metagpt
-cd metagpt
-pip install -e.
+pip install metagpt
+# https://docs.deepwisdom.ai/main/en/guide/get_started/configuration.html
+metagpt --init-config  # it will create ~/.metagpt/config2.yaml, just modify it to your needs
 ```
 
-**Note:**
+### Configuration
 
-- If already have Chrome, Chromium, or MS Edge installed, you can skip downloading Chromium by setting the environment variable
-  `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` to `true`.
+You can configure `~/.metagpt/config2.yaml` according to the [example](https://github.com/geekan/MetaGPT/blob/main/config/config2.example.yaml) and [doc](https://docs.deepwisdom.ai/main/en/guide/get_started/configuration.html):
 
-- Some people are [having issues](https://github.com/mermaidjs/mermaid.cli/issues/15) installing this tool globally. Installing it locally is an alternative solution,
-
-  ```bash
-  npm install @mermaid-js/mermaid-cli
-  ```
-
-- don't forget to the configuration for mmdc in config.yml
-
-  ```yml
-  PUPPETEER_CONFIG: "./config/puppeteer-config.json"
-  MMDC: "./node_modules/.bin/mmdc"
-  ```
-
-- if `pip install -e.` fails with error `[Errno 13] Permission denied: '/usr/local/lib/python3.11/dist-packages/test-easy-install-13129.write-test'`, try instead running `pip install -e. --user`
-
-- To convert Mermaid charts to SVG, PNG, and PDF formats. In addition to the Node.js version of Mermaid-CLI, you now have the option to use Python version Playwright, pyppeteer or mermaid.ink for this task.
-
-  - Playwright
-    - **Install Playwright**
-
-    ```bash
-    pip install playwright
-    ```
-
-    - **Install the Required Browsers**
-
-    to support PDF conversion, please install Chrominum.
-
-    ```bash
-    playwright install --with-deps chromium
-    ```
-
-    - **modify `config.yaml`**
-
-    uncomment MERMAID_ENGINE from config.yaml and change it to `playwright`
-
-    ```yaml
-    MERMAID_ENGINE: playwright
-    ```
-
-  - pyppeteer
-    - **Install pyppeteer**
-
-    ```bash
-    pip install pyppeteer
-    ```
-
-    - **Use your own Browsers**
-
-    pyppeteer alow you use installed browsers,  please set the following envirment
-    
-    ```bash
-    export PUPPETEER_EXECUTABLE_PATH = /path/to/your/chromium or edge or chrome
-    ```
-
-    please do not use this command to install browser, it is too old
-
-    ```bash
-    pyppeteer-install
-    ```
-
-    - **modify `config.yaml`**
-
-    uncomment MERMAID_ENGINE from config.yaml and change it to `pyppeteer`
-
-    ```yaml
-    MERMAID_ENGINE: pyppeteer
-    ```
-
-  - mermaid.ink
-    - **modify `config.yaml`**
-
-    uncomment MERMAID_ENGINE from config.yaml and change it to `ink`
-
-    ```yaml
-    MERMAID_ENGINE: ink
-    ```  
-
-    Note: this method does not support pdf export.
-
-### Installation by Docker
-
-```bash
-# Step 1: Download metagpt official image and prepare config.yaml
-docker pull metagpt/metagpt:latest
-mkdir -p /opt/metagpt/{config,workspace}
-docker run --rm metagpt/metagpt:latest cat /app/metagpt/config/config.yaml > /opt/metagpt/config/key.yaml
-vim /opt/metagpt/config/key.yaml # Change the config
-
-# Step 2: Run metagpt demo with container
-docker run --rm \
-    --privileged \
-    -v /opt/metagpt/config/key.yaml:/app/metagpt/config/key.yaml \
-    -v /opt/metagpt/workspace:/app/metagpt/workspace \
-    metagpt/metagpt:latest \
-    python startup.py "Write a cli snake game"
-
-# You can also start a container and execute commands in it
-docker run --name metagpt -d \
-    --privileged \
-    -v /opt/metagpt/config/key.yaml:/app/metagpt/config/key.yaml \
-    -v /opt/metagpt/workspace:/app/metagpt/workspace \
-    metagpt/metagpt:latest
-
-docker exec -it metagpt /bin/bash
-$ python startup.py "Write a cli snake game"
-```
-
-The command `docker run ...` do the following things:
-
-- Run in privileged mode to have permission to run the browser
-- Map host directory `/opt/metagpt/config` to container directory `/app/metagpt/config`
-- Map host directory `/opt/metagpt/workspace` to container directory `/app/metagpt/workspace`
-- Execute the demo command `python startup.py "Write a cli snake game"`
-
-### Build image by yourself
-
-```bash
-# You can also build metagpt image by yourself.
-git clone https://github.com/geekan/MetaGPT.git
-cd MetaGPT && docker build -t metagpt:custom .
-```
-
-## Configuration
-
-- Configure your `OPENAI_API_KEY` in any of `config/key.yaml / config/config.yaml / env`
-- Priority order: `config/key.yaml > config/config.yaml > env`
-
-```bash
-# Copy the configuration file and make the necessary modifications.
-cp config/config.yaml config/key.yaml
-```
-
-| Variable Name                              | config/key.yaml                           | env                                             |
-| ------------------------------------------ | ----------------------------------------- | ----------------------------------------------- |
-| OPENAI_API_KEY # Replace with your own key | OPENAI_API_KEY: "sk-..."                  | export OPENAI_API_KEY="sk-..."                  |
-| OPENAI_API_BASE # Optional                 | OPENAI_API_BASE: "https://<YOUR_SITE>/v1" | export OPENAI_API_BASE="https://<YOUR_SITE>/v1" |
-
-## Tutorial: Initiating a startup
-
-```shell
-# Run the script
-python startup.py "Write a cli snake game"
-# Do not hire an engineer to implement the project
-python startup.py "Write a cli snake game" --implement False
-# Hire an engineer and perform code reviews
-python startup.py "Write a cli snake game" --code_review True
-```
-
-After running the script, you can find your new project in the `workspace/` directory.
-
-### Preference of Platform or Tool
-
-You can tell which platform or tool you want to use when stating your requirements.
-
-```shell
-python startup.py "Write a cli snake game based on pygame"
+```yaml
+llm:
+  api_type: "openai"  # or azure / ollama / open_llm etc. Check LLMType for more options
+  model: "gpt-4-turbo-preview"  # or gpt-3.5-turbo-1106 / gpt-4-1106-preview
+  base_url: "https://api.openai.com/v1"  # or forward url / other llm url
+  api_key: "YOUR_API_KEY"
 ```
 
 ### Usage
 
-```
-NAME
-    startup.py - We are a software startup comprised of AI. By investing in us, you are empowering a future filled with limitless possibilities.
+After installation, you can use it as CLI
 
-SYNOPSIS
-    startup.py IDEA <flags>
-
-DESCRIPTION
-    We are a software startup comprised of AI. By investing in us, you are empowering a future filled with limitless possibilities.
-
-POSITIONAL ARGUMENTS
-    IDEA
-        Type: str
-        Your innovative idea, such as "Creating a snake game."
-
-FLAGS
-    --investment=INVESTMENT
-        Type: float
-        Default: 3.0
-        As an investor, you have the opportunity to contribute a certain dollar amount to this AI company.
-    --n_round=N_ROUND
-        Type: int
-        Default: 5
-
-NOTES
-    You can also use flags syntax for POSITIONAL ARGUMENTS
+```bash
+metagpt "Create a 2048 game"  # this will create a repo in ./workspace
 ```
 
-### Code walkthrough
+or you can use it as library
 
 ```python
-from metagpt.software_company import SoftwareCompany
-from metagpt.roles import ProjectManager, ProductManager, Architect, Engineer
-
-async def startup(idea: str, investment: float = 3.0, n_round: int = 5):
-    """Run a startup. Be a boss."""
-    company = SoftwareCompany()
-    company.hire([ProductManager(), Architect(), ProjectManager(), Engineer()])
-    company.invest(investment)
-    company.start_project(idea)
-    await company.run(n_round=n_round)
+from metagpt.software_company import generate_repo, ProjectRepo
+repo: ProjectRepo = generate_repo("Create a 2048 game")  # or ProjectRepo("<path>")
+print(repo)  # it will print the repo structure with files
 ```
 
-You can check `examples` for more details on single role (with knowledge base) and LLM only examples.
+detail installation please refer to [cli_install](https://docs.deepwisdom.ai/main/en/guide/get_started/installation.html#install-stable-version)
+ or [docker_install](https://docs.deepwisdom.ai/main/en/guide/get_started/installation.html#install-with-docker)
 
-## QuickStart
+### QuickStart & Demo Video
+- Try it on [MetaGPT Huggingface Space](https://huggingface.co/spaces/deepwisdom/MetaGPT)
+- [Matthew Berman: How To Install MetaGPT - Build A Startup With One Prompt!!](https://youtu.be/uT75J_KG_aY)
+- [Official Demo Video](https://github.com/geekan/MetaGPT/assets/2707039/5e8c1062-8c35-440f-bb20-2b0320f8d27d)
 
-It is difficult to install and configure the local environment for some users. The following tutorials will allow you to quickly experience the charm of MetaGPT.
+https://github.com/geekan/MetaGPT/assets/34952977/34345016-5d13-489d-b9f9-b82ace413419
 
-- [MetaGPT quickstart](https://deepwisdom.feishu.cn/wiki/CyY9wdJc4iNqArku3Lncl4v8n2b)
+## Tutorial
 
-Try it on Huggingface Space
-- https://huggingface.co/spaces/deepwisdom/MetaGPT
+- 🗒 [Online Document](https://docs.deepwisdom.ai/main/en/)
+- 💻 [Usage](https://docs.deepwisdom.ai/main/en/guide/get_started/quickstart.html)  
+- 🔎 [What can MetaGPT do?](https://docs.deepwisdom.ai/main/en/guide/get_started/introduction.html)
+- 🛠 How to build your own agents? 
+  - [MetaGPT Usage & Development Guide | Agent 101](https://docs.deepwisdom.ai/main/en/guide/tutorials/agent_101.html)
+  - [MetaGPT Usage & Development Guide | MultiAgent 101](https://docs.deepwisdom.ai/main/en/guide/tutorials/multi_agent_101.html)
+- 🧑‍💻 Contribution
+  - [Develop Roadmap](docs/ROADMAP.md)
+- 🔖 Use Cases
+  - [Debate](https://docs.deepwisdom.ai/main/en/guide/use_cases/multi_agent/debate.html)
+  - [Researcher](https://docs.deepwisdom.ai/main/en/guide/use_cases/agent/researcher.html)
+  - [Recepit Assistant](https://docs.deepwisdom.ai/main/en/guide/use_cases/agent/receipt_assistant.html)
+- ❓ [FAQs](https://docs.deepwisdom.ai/main/en/guide/faq.html)
+
+## Support
+
+### Discard Join US
+📢 Join Our [Discord Channel](https://discord.gg/ZRHeExS6xv)!
+
+Looking forward to seeing you there! 🎉
+
+### Contact Information
+
+If you have any questions or feedback about this project, please feel free to contact us. We highly appreciate your suggestions!
+
+- **Email:** alexanderwu@deepwisdom.ai
+- **GitHub Issues:** For more technical inquiries, you can also create a new issue in our [GitHub repository](https://github.com/geekan/metagpt/issues).
+
+We will respond to all questions within 2-3 business days.
 
 ## Citation
 
-For now, cite the [Arxiv paper](https://arxiv.org/abs/2308.00352):
+For now, cite the [arXiv paper](https://arxiv.org/abs/2308.00352):
 
 ```bibtex
 @misc{hong2023metagpt,
-      title={MetaGPT: Meta Programming for Multi-Agent Collaborative Framework},
-      author={Sirui Hong and Xiawu Zheng and Jonathan Chen and Yuheng Cheng and Jinlin Wang and Ceyao Zhang and Zili Wang and Steven Ka Shing Yau and Zijuan Lin and Liyang Zhou and Chenyu Ran and Lingfeng Xiao and Chenglin Wu},
+      title={MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework}, 
+      author={Sirui Hong and Mingchen Zhuge and Jonathan Chen and Xiawu Zheng and Yuheng Cheng and Ceyao Zhang and Jinlin Wang and Zili Wang and Steven Ka Shing Yau and Zijuan Lin and Liyang Zhou and Chenyu Ran and Lingfeng Xiao and Chenglin Wu and Jürgen Schmidhuber},
       year={2023},
       eprint={2308.00352},
       archivePrefix={arXiv},
       primaryClass={cs.AI}
 }
 ```
-
-## Contact Information
-
-If you have any questions or feedback about this project, please feel free to contact us. We highly appreciate your suggestions!
-
-- **Email:** alexanderwu@fuzhi.ai
-- **GitHub Issues:** For more technical inquiries, you can also create a new issue in our [GitHub repository](https://github.com/geekan/metagpt/issues).
-
-We will respond to all questions within 2-3 business days.
-
-## Demo
-
-https://github.com/geekan/MetaGPT/assets/2707039/5e8c1062-8c35-440f-bb20-2b0320f8d27d
-
-## Join us
-
-📢 Join Our Discord Channel!
-https://discord.gg/ZRHeExS6xv
-
-Looking forward to seeing you there! 🎉

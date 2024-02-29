@@ -1,42 +1,30 @@
-'''
+"""
 Filename: MetaGPT/examples/build_customized_agent.py
 Created Date: Tuesday, September 19th 2023, 6:52:25 pm
 Author: garylin2099
-'''
+"""
+import asyncio
 import re
 import subprocess
-import asyncio
 
 import fire
 
 from metagpt.actions import Action
-from metagpt.roles import Role
-from metagpt.schema import Message
 from metagpt.logs import logger
-from metagpt import ao_client
+from metagpt.roles.role import Role, RoleReactMode
+from metagpt.schema import Message
+
 
 class SimpleWriteCode(Action):
-
-    PROMPT_TEMPLATE = """
+    PROMPT_TEMPLATE: str = """
     Write a python function that can {instruction} and provide two runnnable test cases.
     Return ```python your_code_here ``` with NO other texts,
-    example: 
-    ```python
-    # function
-    def add(a, b):
-        return a + b
-    # test cases
-    print(add(1, 2))
-    print(add(3, 4))
-    ```
     your code:
     """
 
-    def __init__(self, name="SimpleWriteCode", context=None, llm=None):
-        super().__init__(name, context, llm)
+    name: str = "SimpleWriteCode"
 
     async def run(self, instruction: str):
-
         prompt = self.PROMPT_TEMPLATE.format(instruction=instruction)
 
         rsp = await self._aask(prompt)
@@ -47,96 +35,75 @@ class SimpleWriteCode(Action):
 
     @staticmethod
     def parse_code(rsp):
-        pattern = r'```python(.*)```'
+        pattern = r"```python(.*)```"
         match = re.search(pattern, rsp, re.DOTALL)
         code_text = match.group(1) if match else rsp
         return code_text
 
+
 class SimpleRunCode(Action):
-    def __init__(self, name="SimpleRunCode", context=None, llm=None):
-        super().__init__(name, context, llm)
+    name: str = "SimpleRunCode"
 
     async def run(self, code_text: str):
-        result = subprocess.run(["python3", "-c", code_text], capture_output=True, text=True)
+        result = subprocess.run(
+            ["python3", "-c", code_text], capture_output=True, text=True)
         code_result = result.stdout
         logger.info(f"{code_result=}")
         return code_result
 
+
 class SimpleCoder(Role):
-    def __init__(
-        self,
-        name: str = "Alice",
-        profile: str = "SimpleCoder",
-        **kwargs,
-    ):
-        super().__init__(name, profile, **kwargs)
-        self._init_actions([SimpleWriteCode])
+    name: str = "Alice"
+    profile: str = "SimpleCoder"
 
-    @ao_client.record_action('simple coder act')
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_actions([SimpleWriteCode])
+
     async def _act(self) -> Message:
-        logger.info(f"{self._setting}: ready to {self._rc.todo}")
-        todo = self._rc.todo
+        logger.info(
+            f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")
+        todo = self.rc.todo  # todo will be SimpleWriteCode()
 
-        msg = self._rc.memory.get()[-1] # retrieve the latest memory
-        instruction = msg.content
-
-        code_text = await SimpleWriteCode().run(instruction)
-        msg = Message(content=code_text, role=self.profile, cause_by=todo)
+        msg = self.get_memories(k=1)[0]  # find the most recent messages
+        code_text = await todo.run(msg.content)
+        msg = Message(content=code_text, role=self.profile,
+                      cause_by=type(todo))
 
         return msg
+
 
 class RunnableCoder(Role):
-    def __init__(
-        self,
-        name: str = "Alice",
-        profile: str = "RunnableCoder",
-        **kwargs,
-    ):
-        super().__init__(name, profile, **kwargs)
-        self._init_actions([SimpleWriteCode, SimpleRunCode])
-    
-    @ao_client.record_action('code runner think')
-    async def _think(self) -> None:
-        if self._rc.todo is None:
-            self._set_state(0)
-            return
+    name: str = "Alice"
+    profile: str = "RunnableCoder"
 
-        if self._rc.state + 1 < len(self._states):
-            self._set_state(self._rc.state + 1)
-        else:
-            self._rc.todo = None
-    @ao_client.record_action('code runner coder act')
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_actions([SimpleWriteCode, SimpleRunCode])
+        self._set_react_mode(react_mode=RoleReactMode.BY_ORDER.value)
+
     async def _act(self) -> Message:
-        logger.info(f"{self._setting}: ready to {self._rc.todo}")
-        todo = self._rc.todo
-        msg = self._rc.memory.get()[-1]
+        logger.info(
+            f"{self._setting}: to do {self.rc.todo}({self.rc.todo.name})")
+        # By choosing the Action by order under the hood
+        # todo will be first SimpleWriteCode() then SimpleRunCode()
+        todo = self.rc.todo
 
-        if isinstance(todo, SimpleWriteCode):
-            instruction = msg.content
-            result = await SimpleWriteCode().run(instruction)
+        msg = self.get_memories(k=1)[0]  # find the most k recent messages
+        result = await todo.run(msg.content)
 
-        elif isinstance(todo, SimpleRunCode):
-            code_text = msg.content
-            result = await SimpleRunCode().run(code_text)
-
-        msg = Message(content=result, role=self.profile, cause_by=todo)
-        self._rc.memory.add(msg)
+        msg = Message(content=result, role=self.profile, cause_by=type(todo))
+        self.rc.memory.add(msg)
         return msg
 
-    async def _react(self) -> Message:
-        while True:
-            await self._think()
-            if self._rc.todo is None:
-                break
-            await self._act()
-        return Message(content="All job done", role=self.profile)
 
-def main(msg="write a function that calculates the sum of a list"):
+def main(msg="write a function that calculates the product of a list and run it"):
     # role = SimpleCoder()
     role = RunnableCoder()
     logger.info(msg)
     result = asyncio.run(role.run(msg))
     logger.info(result)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     fire.Fire(main)

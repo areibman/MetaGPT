@@ -5,8 +5,3 @@
 # @File    : __init__.py
 
 from metagpt import _compat as _  # noqa: F401
-import openai
-from agentops import Client
-
-ao_client = Client(api_key="<API KEY GOES HERE>",
-                   tags=['MetaGPT', '2048'])

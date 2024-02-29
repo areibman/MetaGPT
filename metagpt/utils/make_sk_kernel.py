@@ -13,22 +13,20 @@ from semantic_kernel.connectors.ai.open_ai.services.open_ai_chat_completion impo
     OpenAIChatCompletion,
 )
 
-from metagpt.config import CONFIG
+from metagpt.config2 import config
 
 
 def make_sk_kernel():
     kernel = sk.Kernel()
-    if CONFIG.openai_api_type == "azure":
+    if llm := config.get_azure_llm():
         kernel.add_chat_service(
             "chat_completion",
-            AzureChatCompletion(CONFIG.deployment_name, CONFIG.openai_api_base, CONFIG.openai_api_key),
+            AzureChatCompletion(llm.model, llm.base_url, llm.api_key),
         )
-    else:
+    elif llm := config.get_openai_llm():
         kernel.add_chat_service(
             "chat_completion",
-            OpenAIChatCompletion(
-                CONFIG.openai_api_model, CONFIG.openai_api_key, org_id=None, endpoint=CONFIG.openai_api_base
-            ),
+            OpenAIChatCompletion(llm.model, llm.api_key),
         )
 
     return kernel

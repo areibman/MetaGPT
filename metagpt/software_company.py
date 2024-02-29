@@ -1,69 +1,153 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import asyncio
+from pathlib import Path
+
+import typer
+
+from metagpt.const import CONFIG_ROOT
+from metagpt.utils.project_repo import ProjectRepo
+
+app = typer.Typer(add_completion=False, pretty_exceptions_show_locals=False)
+
+
+def generate_repo(
+    idea,
+    investment=3.0,
+    n_round=5,
+    code_review=True,
+    run_tests=False,
+    implement=True,
+    project_name="",
+    inc=False,
+    project_path="",
+    reqa_file="",
+    max_auto_summarize_code=0,
+    recover_path=None,
+) -> ProjectRepo:
+    """Run the startup logic. Can be called from CLI or other Python scripts."""
+    from metagpt.config2 import config
+    from metagpt.context import Context
+    from metagpt.roles import (
+        Architect,
+        Engineer,
+        ProductManager,
+        ProjectManager,
+        QaEngineer,
+    )
+    from metagpt.team import Team
+
+    config.update_via_cli(project_path, project_name, inc, reqa_file, max_auto_summarize_code)
+    ctx = Context(config=config)
+
+    if not recover_path:
+        company = Team(context=ctx)
+        company.hire(
+            [
+                ProductManager(),
+                Architect(),
+                ProjectManager(),
+            ]
+        )
+
+        if implement or code_review:
+            company.hire([Engineer(n_borg=5, use_code_review=code_review)])
+
+        if run_tests:
+            company.hire([QaEngineer()])
+    else:
+        stg_path = Path(recover_path)
+        if not stg_path.exists() or not str(stg_path).endswith("team"):
+            raise FileNotFoundError(f"{recover_path} not exists or not endswith `team`")
+
+        company = Team.deserialize(stg_path=stg_path, context=ctx)
+        idea = company.idea
+
+    company.invest(investment)
+    company.run_project(idea)
+    asyncio.run(company.run(n_round=n_round))
+
+    return ctx.repo
+
+
+@app.command("", help="Start a new project.")
+def startup(
+    idea: str = typer.Argument(None, help="Your innovative idea, such as 'Create a 2048 game.'"),
+    investment: float = typer.Option(default=3.0, help="Dollar amount to invest in the AI company."),
+    n_round: int = typer.Option(default=5, help="Number of rounds for the simulation."),
+    code_review: bool = typer.Option(default=True, help="Whether to use code review."),
+    run_tests: bool = typer.Option(default=False, help="Whether to enable QA for adding & running tests."),
+    implement: bool = typer.Option(default=True, help="Enable or disable code implementation."),
+    project_name: str = typer.Option(default="", help="Unique project name, such as 'game_2048'."),
+    inc: bool = typer.Option(default=False, help="Incremental mode. Use it to coop with existing repo."),
+    project_path: str = typer.Option(
+        default="",
+        help="Specify the directory path of the old version project to fulfill the incremental requirements.",
+    ),
+    reqa_file: str = typer.Option(
+        default="", help="Specify the source file name for rewriting the quality assurance code."
+    ),
+    max_auto_summarize_code: int = typer.Option(
+        default=0,
+        help="The maximum number of times the 'SummarizeCode' action is automatically invoked, with -1 indicating "
+        "unlimited. This parameter is used for debugging the workflow.",
+    ),
+    recover_path: str = typer.Option(default=None, help="recover the project from existing serialized storage"),
+    init_config: bool = typer.Option(default=False, help="Initialize the configuration file for MetaGPT."),
+):
+    """Run a startup. Be a boss."""
+    if init_config:
+        copy_config_to()
+        return
+
+    if idea is None:
+        typer.echo("Missing argument 'IDEA'. Run 'metagpt --help' for more information.")
+        raise typer.Exit()
+
+    return generate_repo(
+        idea,
+        investment,
+        n_round,
+        code_review,
+        run_tests,
+        implement,
+        project_name,
+        inc,
+        project_path,
+        reqa_file,
+        max_auto_summarize_code,
+        recover_path,
+    )
+
+
+DEFAULT_CONFIG = """# Full Example: https://github.com/geekan/MetaGPT/blob/main/config/config2.example.yaml
+# Reflected Code: https://github.com/geekan/MetaGPT/blob/main/metagpt/config2.py
+llm:
+  api_type: "openai"  # or azure / ollama / open_llm etc. Check LLMType for more options
+  model: "gpt-4-turbo-preview"  # or gpt-3.5-turbo-1106 / gpt-4-1106-preview
+  base_url: "https://api.openai.com/v1"  # or forward url / other llm url
+  api_key: "YOUR_API_KEY"
 """
-@Time    : 2023/5/12 00:30
-@Author  : alexanderwu
-@File    : software_company.py
-"""
-from pydantic import BaseModel, Field
-
-from metagpt.actions import BossRequirement
-from metagpt.config import CONFIG
-from metagpt.environment import Environment
-from metagpt.logs import logger
-from metagpt.roles import Role
-from metagpt.schema import Message
-from metagpt.utils.common import NoMoneyException
-
-from metagpt import ao_client
 
 
-class SoftwareCompany(BaseModel):
-    """
-    Software Company: Possesses a team, SOP (Standard Operating Procedures), and a platform for instant messaging,
-    dedicated to writing executable code.
-    """
-    environment: Environment = Field(default_factory=Environment)
-    investment: float = Field(default=10.0)
-    idea: str = Field(default="")
+def copy_config_to():
+    """Initialize the configuration file for MetaGPT."""
+    target_path = CONFIG_ROOT / "config2.yaml"
 
-    class Config:
-        arbitrary_types_allowed = True
+    # 创建目标目录（如果不存在）
+    target_path.parent.mkdir(parents=True, exist_ok=True)
 
-    @ao_client.record_action('hire')
-    def hire(self, roles: list[Role]):
-        """Hire roles to cooperate"""
-        self.environment.add_roles(roles)
+    # 如果目标文件已经存在，则重命名为 .bak
+    if target_path.exists():
+        backup_path = target_path.with_suffix(".bak")
+        target_path.rename(backup_path)
+        print(f"Existing configuration file backed up at {backup_path}")
 
-    @ao_client.record_action('invest')
-    def invest(self, investment: float):
-        """Invest company. raise NoMoneyException when exceed max_budget."""
-        self.investment = investment
-        CONFIG.max_budget = investment
-        logger.info(f'Investment: ${investment}.')
+    # 复制文件
+    target_path.write_text(DEFAULT_CONFIG, encoding="utf-8")
+    print(f"Configuration file initialized at {target_path}")
 
-    def _check_balance(self):
-        if CONFIG.total_cost > CONFIG.max_budget:
-            raise NoMoneyException(
-                CONFIG.total_cost, f'Insufficient funds: {CONFIG.max_budget}')
 
-    @ao_client.record_action('start_project',)
-    def start_project(self, idea):
-        """Start a project from publishing boss requirement."""
-        self.idea = idea
-        self.environment.publish_message(
-            Message(role="BOSS", content=idea, cause_by=BossRequirement))
-
-    def _save(self):
-        logger.info(self.json())
-
-    @ao_client.record_action('run',)
-    async def run(self, n_round=3):
-        """Run company until target round or no money"""
-        while n_round > 0:
-            # self._save()
-            n_round -= 1
-            logger.debug(f"{n_round=}")
-            self._check_balance()
-            await self.environment.run()
-        return self.environment.history
+if __name__ == "__main__":
+    app()

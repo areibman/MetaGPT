@@ -5,16 +5,16 @@
 @Author  : alexanderwu
 @File    : llm.py
 """
+from typing import Optional
 
-from metagpt.provider.anthropic_api import Claude2 as Claude
-from metagpt.provider.openai_api import OpenAIGPTAPI as LLM
-
-DEFAULT_LLM = LLM()
-CLAUDE_LLM = Claude()
+from metagpt.configs.llm_config import LLMConfig
+from metagpt.context import Context
+from metagpt.provider.base_llm import BaseLLM
 
 
-async def ai_func(prompt):
-    """使用LLM进行QA
-       QA with LLMs
-     """
-    return await DEFAULT_LLM.aask(prompt)
+def LLM(llm_config: Optional[LLMConfig] = None, context: Context = None) -> BaseLLM:
+    """get the default llm provider if name is None"""
+    ctx = context or Context()
+    if llm_config is not None:
+        return ctx.llm_with_cost_manager_from_llm_config(llm_config)
+    return ctx.llm()

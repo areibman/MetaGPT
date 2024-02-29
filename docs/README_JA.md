@@ -1,7 +1,7 @@
 # MetaGPT: マルチエージェントフレームワーク
 
 <p align="center">
-<a href=""><img src="resources/MetaGPT-logo.jpeg" alt="MetaGPT ロゴ: GPT がソフトウェア会社で働けるようにし、協力してより複雑な仕事に取り組む。" width="150px"></a>
+<a href=""><img src="resources/MetaGPT-new-log.png" alt="MetaGPT ロゴ: GPT がソフトウェア会社で働けるようにし、協力してより複雑な仕事に取り組む。" width="150px"></a>
 </p>
 
 <p align="center">
@@ -15,11 +15,10 @@
 <a href="https://discord.gg/wCp6Q3fsAk"><img src="https://img.shields.io/badge/Discord-Join-blue?logo=discord&logoColor=white&color=blue" alt="Discord Follow"></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
 <a href="docs/ROADMAP.md"><img src="https://img.shields.io/badge/ROADMAP-路线图-blue" alt="roadmap"></a>
-<a href="https://twitter.com/DeepWisdom2019"><img src="https://img.shields.io/twitter/follow/MetaGPT?style=social" alt="Twitter Follow"></a>
+<a href="https://twitter.com/MetaGPT_"><img src="https://img.shields.io/twitter/follow/MetaGPT?style=social" alt="Twitter Follow"></a>
 </p>
 
 <p align="center">
-   <a href="https://airtable.com/appInfdG0eJ9J4NNL/shrEd9DrwVE3jX6oz"><img src="https://img.shields.io/badge/AgentStore-Waitlist-ffc107?logoColor=white" alt="AgentStore Waitlist"></a>
    <a href="https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/geekan/MetaGPT"><img src="https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode" alt="Open in Dev Containers"></a>
    <a href="https://codespaces.new/geekan/MetaGPT"><img src="https://img.shields.io/badge/Github_Codespace-Open-blue?logo=github" alt="Open in GitHub Codespaces"></a>
    <a href="https://huggingface.co/spaces/deepwisdom/MetaGPT" target="_blank"><img alt="Hugging Face" src="https://img.shields.io/badge/%F0%9F%A4%97%20-Hugging%20Face-blue?color=blue&logoColor=white" /></a>
@@ -33,18 +32,23 @@
 
 <p align="center">ソフトウェア会社のマルチロール図式（順次導入）</p>
 
-## MetaGPTの能力
+## MetaGPT の能力
+
 
 https://github.com/geekan/MetaGPT/assets/34952977/34345016-5d13-489d-b9f9-b82ace413419
 
 
+<<<<<<< HEAD
 ## 例（GPT-4 で完全生成）
 
 例えば、`python startup.py "Toutiao のような RecSys をデザインする"`と入力すると、多くの出力が得られます
+>>>>>>> upstream/main
 
 ![Jinri Toutiao Recsys データと API デザイン](resources/workspace/content_rec_sys/resources/data_api_design.png)
 
-解析と設計を含む 1 つの例を生成するのに約 **$0.2**（GPT-4 の API 使用料）、完全なプロジェクトでは約 **$2.0** かかります。
+
+
+
 
 ## インストール
 
@@ -53,19 +57,21 @@ https://github.com/geekan/MetaGPT/assets/34952977/34345016-5d13-489d-b9f9-b82ace
 - [Matthew Berman: How To Install MetaGPT - Build A Startup With One Prompt!!](https://youtu.be/uT75J_KG_aY)
 
 ### 伝統的なインストール
+> Python 3.9 以上がシステムにインストールされていることを確認してください。これは `python --version` を使ってチェックできます。  
+> 以下のようにcondaを使うことができます：`conda create -n metagpt python=3.9 && conda activate metagpt`
 
 ```bash
-# ステップ 1: NPM がシステムにインストールされていることを確認してください。次に mermaid-js をインストールします。
-npm --version
-sudo npm install -g @mermaid-js/mermaid-cli
+pip install metagpt
+metagpt --init-config  # ~/.metagpt/config2.yaml を作成し、自分の設定に合わせて変更してください
+metagpt "2048ゲームを作成する"  # これにより ./workspace にリポジトリが作成されます
+```
 
-# ステップ 2: Python 3.9+ がシステムにインストールされていることを確認してください。これを確認するには:
-python --version
+または、ライブラリとして使用することもできます
 
-# ステップ 3: リポジトリをローカルマシンにクローンし、インストールする。
-git clone https://github.com/geekan/metagpt
-cd metagpt
-pip install -e.
+```python
+from metagpt.software_company import generate_repo, ProjectRepo
+repo: ProjectRepo = generate_repo("2048ゲームを作成する")  # または ProjectRepo("<パス>")
+print(repo)  # リポジトリの構造とファイルを出力します
 ```
 
 **注:**
@@ -79,49 +85,118 @@ Chromium のダウンロードをスキップすることができます。
   npm install @mermaid-js/mermaid-cli
   ```
 
-- config.yml に mmdc のコンフィギュレーションを記述するのを忘れないこと
+- config.yml に mmdc のコンフィグを記述するのを忘れないこと
 
   ```yml
-  PUPPETEER_CONFIG: "./config/puppeteer-config.json"
-  MMDC: "./node_modules/.bin/mmdc"
+  puppeteer_config: "./config/puppeteer-config.json"
+  path: "./node_modules/.bin/mmdc"
   ```
 
 - もし `pip install -e.` がエラー `[Errno 13] Permission denied: '/usr/local/lib/python3.11/dist-packages/test-easy-install-13129.write-test'` で失敗したら、代わりに `pip install -e. --user` を実行してみてください
 
+- Mermaid charts を SVG、PNG、PDF 形式に変換します。Node.js 版の Mermaid-CLI に加えて、Python 版の Playwright、pyppeteer、または mermaid.ink をこのタスクに使用できるようになりました。
+
+  - Playwright
+    - **Playwright のインストール**
+
+    ```bash
+    pip install playwright
+    ```
+
+    - **必要なブラウザのインストール**
+
+    PDF変換をサポートするには、Chrominumをインストールしてください。
+
+    ```bash
+    playwright install --with-deps chromium
+    ```
+
+    - **modify `config2.yaml`**
+
+    config2.yaml から mermaid.engine のコメントを外し、`playwright` に変更する
+
+    ```yaml
+    mermaid:
+      engine: playwright
+    ```
+
+  - pyppeteer
+    - **pyppeteer のインストール**
+
+    ```bash
+    pip install pyppeteer
+    ```
+
+    - **自分のブラウザを使用**
+
+    pyppeteer を使えばインストールされているブラウザを使うことができます、以下の環境を設定してください
+
+    ```bash
+    export PUPPETEER_EXECUTABLE_PATH = /path/to/your/chromium or edge or chrome
+    ```
+
+    ブラウザのインストールにこのコマンドを使わないでください、これは古すぎます
+
+    ```bash
+    pyppeteer-install
+    ```
+
+    - **`config2.yaml` を修正**
+
+    config2.yaml から mermaid.engine のコメントを外し、`pyppeteer` に変更する
+
+    ```yaml
+    mermaid:
+      engine: pyppeteer
+    ```
+
+  - mermaid.ink
+    - **`config2.yaml` を修正**
+
+    config2.yaml から mermaid.engine のコメントを外し、`ink` に変更する
+
+    ```yaml
+    mermaid:
+      engine: ink
+    ```
+
+    注: この方法は pdf エクスポートに対応していません。
+
 ### Docker によるインストール
+> Windowsでは、"/opt/metagpt"をDockerが作成する権限を持つディレクトリに置き換える必要があります。例えば、"D:\Users\x\metagpt"などです。
 
 ```bash
-# ステップ 1: metagpt 公式イメージをダウンロードし、config.yaml を準備する
+# ステップ 1: metagpt 公式イメージをダウンロードし、config2.yaml を準備する
 docker pull metagpt/metagpt:latest
 mkdir -p /opt/metagpt/{config,workspace}
-docker run --rm metagpt/metagpt:latest cat /app/metagpt/config/config.yaml > /opt/metagpt/config/key.yaml
-vim /opt/metagpt/config/key.yaml # 設定を変更する
+docker run --rm metagpt/metagpt:latest cat /app/metagpt/config/config2.yaml > /opt/metagpt/config/config2.yaml
+vim /opt/metagpt/config/config2.yaml # 設定を変更する
 
 # ステップ 2: コンテナで metagpt デモを実行する
 docker run --rm \
     --privileged \
-    -v /opt/metagpt/config/key.yaml:/app/metagpt/config/key.yaml \
+    -v /opt/metagpt/config/config2.yaml:/app/metagpt/config/config2.yaml \
     -v /opt/metagpt/workspace:/app/metagpt/workspace \
     metagpt/metagpt:latest \
-    python startup.py "Write a cli snake game"
+    metagpt "Write a cli snake game"
 
 # コンテナを起動し、その中でコマンドを実行することもできます
 docker run --name metagpt -d \
     --privileged \
-    -v /opt/metagpt/config/key.yaml:/app/metagpt/config/key.yaml \
+    -v /opt/metagpt/config/config2.yaml:/app/metagpt/config/config2.yaml \
     -v /opt/metagpt/workspace:/app/metagpt/workspace \
     metagpt/metagpt:latest
-
-docker exec -it metagpt /bin/bash
 $ python startup.py "Write a cli snake game"
+$ metagpt "Write a cli snake game"
+>>>>>>> upstream/main
 ```
 
 コマンド `docker run ...` は以下のことを行います:
 
 - 特権モードで実行し、ブラウザの実行権限を得る
-- ホストディレクトリ `/opt/metagpt/config` をコンテナディレクトリ `/app/metagpt/config` にマップする
-- ホストディレクトリ `/opt/metagpt/workspace` をコンテナディレクトリ `/app/metagpt/workspace` にマップする
-- デモコマンド `python startup.py "Write a cli snake game"` を実行する
+- ホスト設定ファイル `/opt/metagpt/config/config2.yaml` をコンテナ `/app/metagpt/config/config2.yaml` にマップします
+- ホストディレクトリ `/opt/metagpt/workspace` をコンテナディレクトリ `/app/metagpt/workspace` にマップするs
+- デモコマンド `metagpt "Write a cli snake game"` を実行する
 
 ### 自分でイメージをビルドする
 
@@ -133,28 +208,23 @@ cd MetaGPT && docker build -t metagpt:custom .
 
 ## 設定
 
-- `OPENAI_API_KEY` を `config/key.yaml / config/config.yaml / env` のいずれかで設定します。
-- 優先順位は: `config/key.yaml > config/config.yaml > env` の順です。
+- `api_key` を `~/.metagpt/config2.yaml / config/config2.yaml` のいずれかで設定します。
+- 優先順位は: `~/.metagpt/config2.yaml > config/config2.yaml > env` の順です。
 
 ```bash
 # 設定ファイルをコピーし、必要な修正を加える。
-cp config/config.yaml config/key.yaml
+cp config/config2.yaml ~/.metagpt/config2.yaml
 ```
-
-| 変数名                                  | config/key.yaml                           | env                                             |
-| --------------------------------------- | ----------------------------------------- | ----------------------------------------------- |
-| OPENAI_API_KEY # 自分のキーに置き換える | OPENAI_API_KEY: "sk-..."                  | export OPENAI_API_KEY="sk-..."                  |
-| OPENAI_API_BASE # オプション            | OPENAI_API_BASE: "https://<YOUR_SITE>/v1" | export OPENAI_API_BASE="https://<YOUR_SITE>/v1" |
 
 ## チュートリアル: スタートアップの開始
 
 ```shell
 # スクリプトの実行
-python startup.py "Write a cli snake game"
+metagpt "Write a cli snake game"
 # プロジェクトの実施にエンジニアを雇わないこと
-python startup.py "Write a cli snake game" --implement False
+metagpt "Write a cli snake game" --no-implement
 # エンジニアを雇い、コードレビューを行う
-python startup.py "Write a cli snake game" --code_review True
+metagpt "Write a cli snake game" --code_review
 ```
 
 スクリプトを実行すると、`workspace/` ディレクトリに新しいプロジェクトが見つかります。
@@ -164,17 +234,17 @@ python startup.py "Write a cli snake game" --code_review True
 要件を述べるときに、どのプラットフォームまたはツールを使用するかを指定できます。
 
 ```shell
-python startup.py "pygame をベースとした cli ヘビゲームを書く"
+metagpt "pygame をベースとした cli ヘビゲームを書く"
 ```
 
 ### 使用方法
 
 ```
 会社名
-    startup.py - 私たちは AI で構成されたソフトウェア・スタートアップです。私たちに投資することは、無限の可能性に満ちた未来に力を与えることです。
+    metagpt - 私たちは AI で構成されたソフトウェア・スタートアップです。私たちに投資することは、無限の可能性に満ちた未来に力を与えることです。
 
 シノプシス
-    startup.py IDEA <flags>
+    metagpt IDEA <flags>
 
 説明
     私たちは AI で構成されたソフトウェア・スタートアップです。私たちに投資することは、無限の可能性に満ちた未来に力を与えることです。
@@ -200,12 +270,12 @@ python startup.py "pygame をベースとした cli ヘビゲームを書く"
 ### コードウォークスルー
 
 ```python
-from metagpt.software_company import SoftwareCompany
+from metagpt.team import Team
 from metagpt.roles import ProjectManager, ProductManager, Architect, Engineer
 
 async def startup(idea: str, investment: float = 3.0, n_round: int = 5):
     """スタートアップを実行する。ボスになる。"""
-    company = SoftwareCompany()
+    company = Team()
     company.hire([ProductManager(), Architect(), ProjectManager(), Engineer()])
     company.invest(investment)
     company.start_project(idea)
@@ -225,12 +295,12 @@ Hugging Face Space で試す
 
 ## 引用
 
-現時点では、[Arxiv 論文](https://arxiv.org/abs/2308.00352)を引用してください:
+現時点では、[arXiv 論文](https://arxiv.org/abs/2308.00352)を引用してください:
 
 ```bibtex
 @misc{hong2023metagpt,
-      title={MetaGPT: Meta Programming for Multi-Agent Collaborative Framework},
-      author={Sirui Hong and Xiawu Zheng and Jonathan Chen and Yuheng Cheng and Jinlin Wang and Ceyao Zhang and Zili Wang and Steven Ka Shing Yau and Zijuan Lin and Liyang Zhou and Chenyu Ran and Lingfeng Xiao and Chenglin Wu},
+      title={MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework}, 
+      author={Sirui Hong and Mingchen Zhuge and Jonathan Chen and Xiawu Zheng and Yuheng Cheng and Ceyao Zhang and Jinlin Wang and Zili Wang and Steven Ka Shing Yau and Zijuan Lin and Liyang Zhou and Chenyu Ran and Lingfeng Xiao and Chenglin Wu and Jürgen Schmidhuber},
       year={2023},
       eprint={2308.00352},
       archivePrefix={arXiv},
@@ -242,7 +312,7 @@ Hugging Face Space で試す
 
 このプロジェクトに関するご質問やご意見がございましたら、お気軽にお問い合わせください。皆様のご意見をお待ちしております！
 
-- **Email:** alexanderwu@fuzhi.ai
+- **Email:** alexanderwu@deepwisdom.ai
 - **GitHub Issues:** 技術的なお問い合わせについては、[GitHub リポジトリ](https://github.com/geekan/metagpt/issues) に新しい issue を作成することもできます。
 
 ご質問には 2-3 営業日以内に回答いたします。

@@ -4,82 +4,210 @@
 @Time    : 2023/5/11 17:45
 @Author  : alexanderwu
 @File    : write_code.py
+@Modified By: mashenquan, 2023-11-1. In accordance with Chapter 2.1.3 of RFC 116, modify the data type of the `cause_by`
+            value of the `Message` object.
+@Modified By: mashenquan, 2023-11-27.
+        1. Mark the location of Design, Tasks, Legacy Code and Debug logs in the PROMPT_TEMPLATE with markdown
+        code-block formatting to enhance the understanding for the LLM.
+        2. Following the think-act principle, solidify the task parameters when creating the WriteCode object, rather
+        than passing them in when calling the run function.
+        3. Encapsulate the input of RunCode into RunCodeContext and encapsulate the output of RunCode into
+        RunCodeResult to standardize and unify parameter passing between WriteCode, RunCode, and DebugError.
 """
-from metagpt.actions import WriteDesign
+
+import json
+
+from pydantic import Field
+from tenacity import retry, stop_after_attempt, wait_random_exponential
+
 from metagpt.actions.action import Action
-from metagpt.const import WORKSPACE_ROOT
+from metagpt.actions.project_management_an import REFINED_TASK_LIST, TASK_LIST
+from metagpt.actions.write_code_plan_and_change_an import REFINED_TEMPLATE
+from metagpt.const import BUGFIX_FILENAME, REQUIREMENT_FILENAME
 from metagpt.logs import logger
-from metagpt.schema import Message
+from metagpt.schema import CodingContext, Document, RunCodeResult
 from metagpt.utils.common import CodeParser
-from tenacity import retry, stop_after_attempt, wait_fixed
-from metagpt import ao_client
+from metagpt.utils.project_repo import ProjectRepo
 
 PROMPT_TEMPLATE = """
 NOTICE
-Role: You are a professional engineer; the main goal is to write PEP8 compliant, elegant, modular, easy to read and maintain Python 3.9 code (but you can also use other programming language)
+Role: You are a professional engineer; the main goal is to write google-style, elegant, modular, easy to read and maintain code
+Language: Please use the same language as the user requirement, but the title and code should be still in English. For example, if the user speaks Chinese, the specific text of your answer should also be in Chinese.
 ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenced "Format example".
 
-## Code: {filename} Write code with triple quoto, based on the following list and context.
-1. Do your best to implement THIS ONLY ONE FILE. ONLY USE EXISTING API. IF NO API, IMPLEMENT IT.
-2. Requirement: Based on the context, implement one following code file, note to return only in code form, your code will be part of the entire project, so please implement complete, reliable, reusable code snippets
-3. Attention1: If there is any setting, ALWAYS SET A DEFAULT VALUE, ALWAYS USE STRONG TYPE AND EXPLICIT VARIABLE.
-4. Attention2: YOU MUST FOLLOW "Data structures and interface definitions". DONT CHANGE ANY DESIGN.
-5. Think before writing: What should be implemented and provided in this document?
-6. CAREFULLY CHECK THAT YOU DONT MISS ANY NECESSARY CLASS/FUNCTION IN THIS FILE.
-7. Do not use public member functions that do not exist in your design.
-
------
 # Context
-{context}
------
-## Format example
------
+## Design
+{design}
+
+## Task
+{task}
+
+## Legacy Code
+```Code
+{code}
+```
+
+## Debug logs
+```text
+{logs}
+
+{summary_log}
+```
+
+## Bug Feedback logs
+```text
+{feedback}
+```
+
+# Format example
 ## Code: {filename}
 ```python
 ## {filename}
 ...
 ```
------
+
+# Instruction: Based on the context, follow "Format example", write code.
+
+## Code: {filename}. Write code with triple quoto, based on the following attentions and context.
+1. Only One file: do your best to implement THIS ONLY ONE FILE.
+2. COMPLETE CODE: Your code will be part of the entire project, so please implement complete, reliable, reusable code snippets.
+3. Set default value: If there is any setting, ALWAYS SET A DEFAULT VALUE, ALWAYS USE STRONG TYPE AND EXPLICIT VARIABLE. AVOID circular import.
+4. Follow design: YOU MUST FOLLOW "Data structures and interfaces". DONT CHANGE ANY DESIGN. Do not use public member functions that do not exist in your design.
+5. CAREFULLY CHECK THAT YOU DONT MISS ANY NECESSARY CLASS/FUNCTION IN THIS FILE.
+6. Before using a external variable/module, make sure you import it first.
+7. Write out EVERY CODE DETAIL, DON'T LEAVE TODO.
+
 """
 
 
 class WriteCode(Action):
-    def __init__(self, name="WriteCode", context: list[Message] = None, llm=None):
-        super().__init__(name, context, llm)
+    name: str = "WriteCode"
+    i_context: Document = Field(default_factory=Document)
 
-    def _is_invalid(self, filename):
-        return any(i in filename for i in ["mp3", "wav"])
-
-    def _save(self, context, filename, code):
-        # logger.info(filename)
-        # logger.info(code_rsp)
-        if self._is_invalid(filename):
-            return
-
-        design = [i for i in context if i.cause_by == WriteDesign][0]
-
-        ws_name = CodeParser.parse_str(block="Python package name", text=design.content)
-        ws_path = WORKSPACE_ROOT / ws_name
-        if f"{ws_name}/" not in filename and all(i not in filename for i in ["requirements.txt", ".md"]):
-            ws_path = ws_path / ws_name
-        code_path = ws_path / filename
-        code_path.parent.mkdir(parents=True, exist_ok=True)
-        code_path.write_text(code)
-        logger.info(f"Saving Code to {code_path}")
-
-    @ao_client.record_action('write code')
-    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
-    async def write_code(self, prompt):
+    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+    async def write_code(self, prompt) -> str:
         code_rsp = await self._aask(prompt)
         code = CodeParser.parse_code(block="", text=code_rsp)
         return code
 
-    @ao_client.record_action('write run code')
-    async def run(self, context, filename):
-        prompt = PROMPT_TEMPLATE.format(context=context, filename=filename)
-        logger.info(f'Writing {filename}..')
+    async def run(self, *args, **kwargs) -> CodingContext:
+        bug_feedback = await self.repo.docs.get(filename=BUGFIX_FILENAME)
+        coding_context = CodingContext.loads(self.i_context.content)
+        test_doc = await self.repo.test_outputs.get(filename="test_" + coding_context.filename + ".json")
+        requirement_doc = await self.repo.docs.get(filename=REQUIREMENT_FILENAME)
+        summary_doc = None
+        if coding_context.design_doc and coding_context.design_doc.filename:
+            summary_doc = await self.repo.docs.code_summary.get(filename=coding_context.design_doc.filename)
+        logs = ""
+        if test_doc:
+            test_detail = RunCodeResult.loads(test_doc.content)
+            logs = test_detail.stderr
+
+        if bug_feedback:
+            code_context = coding_context.code_doc.content
+        elif self.config.inc:
+            code_context = await self.get_codes(
+                coding_context.task_doc, exclude=self.i_context.filename, project_repo=self.repo, use_inc=True
+            )
+        else:
+            code_context = await self.get_codes(
+                coding_context.task_doc,
+                exclude=self.i_context.filename,
+                project_repo=self.repo.with_src_path(self.context.src_workspace),
+            )
+
+        if self.config.inc:
+            prompt = REFINED_TEMPLATE.format(
+                user_requirement=requirement_doc.content if requirement_doc else "",
+                code_plan_and_change=str(coding_context.code_plan_and_change_doc),
+                design=coding_context.design_doc.content if coding_context.design_doc else "",
+                task=coding_context.task_doc.content if coding_context.task_doc else "",
+                code=code_context,
+                logs=logs,
+                feedback=bug_feedback.content if bug_feedback else "",
+                filename=self.i_context.filename,
+                summary_log=summary_doc.content if summary_doc else "",
+            )
+        else:
+            prompt = PROMPT_TEMPLATE.format(
+                design=coding_context.design_doc.content if coding_context.design_doc else "",
+                task=coding_context.task_doc.content if coding_context.task_doc else "",
+                code=code_context,
+                logs=logs,
+                feedback=bug_feedback.content if bug_feedback else "",
+                filename=self.i_context.filename,
+                summary_log=summary_doc.content if summary_doc else "",
+            )
+        logger.info(f"Writing {coding_context.filename}..")
         code = await self.write_code(prompt)
-        # code_rsp = await self._aask_v1(prompt, "code_rsp", OUTPUT_MAPPING)
-        # self._save(context, filename, code)
-        return code
-    
+        if not coding_context.code_doc:
+            # avoid root_path pydantic ValidationError if use WriteCode alone
+            root_path = self.context.src_workspace if self.context.src_workspace else ""
+            coding_context.code_doc = Document(filename=coding_context.filename, root_path=str(root_path))
+        coding_context.code_doc.content = code
+        return coding_context
+
+    @staticmethod
+    async def get_codes(task_doc: Document, exclude: str, project_repo: ProjectRepo, use_inc: bool = False) -> str:
+        """
+        Get codes for generating the exclude file in various scenarios.
+
+        Attributes:
+            task_doc (Document): Document object of the task file.
+            exclude (str): The file to be generated. Specifies the filename to be excluded from the code snippets.
+            project_repo (ProjectRepo): ProjectRepo object of the project.
+            use_inc (bool): Indicates whether the scenario involves incremental development. Defaults to False.
+
+        Returns:
+            str: Codes for generating the exclude file.
+        """
+        if not task_doc:
+            return ""
+        if not task_doc.content:
+            task_doc = project_repo.docs.task.get(filename=task_doc.filename)
+        m = json.loads(task_doc.content)
+        code_filenames = m.get(TASK_LIST.key, []) if use_inc else m.get(REFINED_TASK_LIST.key, [])
+        codes = []
+        src_file_repo = project_repo.srcs
+
+        # Incremental development scenario
+        if use_inc:
+            src_files = src_file_repo.all_files
+            # Get the old workspace contained the old codes and old workspace are created in previous CodePlanAndChange
+            old_file_repo = project_repo.git_repo.new_file_repository(relative_path=project_repo.old_workspace)
+            old_files = old_file_repo.all_files
+            # Get the union of the files in the src and old workspaces
+            union_files_list = list(set(src_files) | set(old_files))
+            for filename in union_files_list:
+                # Exclude the current file from the all code snippets
+                if filename == exclude:
+                    # If the file is in the old workspace, use the old code
+                    # Exclude unnecessary code to maintain a clean and focused main.py file, ensuring only relevant and
+                    # essential functionality is included for the project’s requirements
+                    if filename in old_files and filename != "main.py":
+                        # Use old code
+                        doc = await old_file_repo.get(filename=filename)
+                    # If the file is in the src workspace, skip it
+                    else:
+                        continue
+                    codes.insert(0, f"-----Now, {filename} to be rewritten\n```{doc.content}```\n=====")
+                # The code snippets are generated from the src workspace
+                else:
+                    doc = await src_file_repo.get(filename=filename)
+                    # If the file does not exist in the src workspace, skip it
+                    if not doc:
+                        continue
+                    codes.append(f"----- {filename}\n```{doc.content}```")
+
+        # Normal scenario
+        else:
+            for filename in code_filenames:
+                # Exclude the current file to get the code snippets for generating the current file
+                if filename == exclude:
+                    continue
+                doc = await src_file_repo.get(filename=filename)
+                if not doc:
+                    continue
+                codes.append(f"----- {filename}\n```{doc.content}```")
+
+        return "\n".join(codes)

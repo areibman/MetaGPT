@@ -5,10 +5,12 @@
 @Author  : alexanderwu
 @File    : search_google.py
 """
+from typing import Optional
+
 import pydantic
+from pydantic import model_validator
 
 from metagpt.actions import Action
-from metagpt.config import Config
 from metagpt.logs import logger
 from metagpt.schema import Message
 from metagpt.tools.search_engine import SearchEngine
@@ -53,7 +55,6 @@ SEARCH_AND_SUMMARIZE_PROMPT = """
 
 
 """
-
 
 SEARCH_AND_SUMMARIZE_SALES_SYSTEM = """## Requirements
 1. Please summarize the latest dialogue based on the reference information (secondary) and dialogue history (primary). Do not include text that is irrelevant to the conversation.
@@ -101,17 +102,22 @@ You are a member of a professional butler team and will provide helpful suggesti
 
 
 class SearchAndSummarize(Action):
-    def __init__(self, name="", context=None, llm=None, engine=None, search_func=None):
-        self.config = Config()
-        self.engine = engine or self.config.search_engine
+    name: str = ""
+    content: Optional[str] = None
+    search_engine: SearchEngine = None
+    result: str = ""
 
-        try:
-            self.search_engine = SearchEngine(self.engine, run_func=search_func)
-        except pydantic.ValidationError:
-            self.search_engine = None
+    @model_validator(mode="after")
+    def validate_search_engine(self):
+        if self.search_engine is None:
+            try:
+                config = self.config
+                search_engine = SearchEngine.from_search_config(config.search, proxy=config.proxy)
+            except pydantic.ValidationError:
+                search_engine = None
 
-        self.result = ""
-        super().__init__(name, context, llm)
+            self.search_engine = search_engine
+        return self
 
     async def run(self, context: list[Message], system_text=SEARCH_AND_SUMMARIZE_SYSTEM) -> str:
         if self.search_engine is None:
@@ -130,8 +136,7 @@ class SearchAndSummarize(Action):
         system_prompt = [system_text]
 
         prompt = SEARCH_AND_SUMMARIZE_PROMPT.format(
-            # PREFIX = self.prefix,
-            ROLE=self.profile,
+            ROLE=self.prefix,
             CONTEXT=rsp,
             QUERY_HISTORY="\n".join([str(i) for i in context[:-1]]),
             QUERY=str(context[-1]),
@@ -140,4 +145,3 @@ class SearchAndSummarize(Action):
         logger.debug(prompt)
         logger.debug(result)
         return result
-    

@@ -3,7 +3,12 @@ from typing import Generator, Sequence
 from metagpt.utils.token_counter import TOKEN_MAX, count_string_tokens
 
 
-def reduce_message_length(msgs: Generator[str, None, None], model_name: str, system_text: str, reserved: int = 0,) -> str:
+def reduce_message_length(
+    msgs: Generator[str, None, None],
+    model_name: str,
+    system_text: str,
+    reserved: int = 0,
+) -> str:
     """Reduce the length of concatenated message segments to fit within the maximum token size.
 
     Args:
@@ -20,7 +25,7 @@ def reduce_message_length(msgs: Generator[str, None, None], model_name: str, sys
     """
     max_token = TOKEN_MAX.get(model_name, 2048) - count_string_tokens(system_text, model_name) - reserved
     for msg in msgs:
-        if count_string_tokens(msg, model_name) < max_token:
+        if count_string_tokens(msg, model_name) < max_token or model_name not in TOKEN_MAX:
             return msg
 
     raise RuntimeError("fail to reduce message length")
@@ -49,9 +54,9 @@ def generate_prompt_chunk(
     current_token = 0
     current_lines = []
 
-    reserved = reserved + count_string_tokens(prompt_template+system_text, model_name)
+    reserved = reserved + count_string_tokens(prompt_template + system_text, model_name)
     # 100 is a magic number to ensure the maximum context length is not exceeded
-    max_token = TOKEN_MAX.get(model_name, 2048) - reserved - 100  
+    max_token = TOKEN_MAX.get(model_name, 2048) - reserved - 100
 
     while paragraphs:
         paragraph = paragraphs.pop(0)
@@ -88,7 +93,7 @@ def split_paragraph(paragraph: str, sep: str = ".,", count: int = 2) -> list[str
             continue
         ret = ["".join(j) for j in _split_by_count(sentences, count)]
         return ret
-    return _split_by_count(paragraph, count)
+    return list(_split_by_count(paragraph, count))
 
 
 def decode_unicode_escape(text: str) -> str:
@@ -103,7 +108,7 @@ def decode_unicode_escape(text: str) -> str:
     return text.encode("utf-8").decode("unicode_escape", "ignore")
 
 
-def _split_by_count(lst: Sequence , count: int):
+def _split_by_count(lst: Sequence, count: int):
     avg = len(lst) // count
     remainder = len(lst) % count
     start = 0
